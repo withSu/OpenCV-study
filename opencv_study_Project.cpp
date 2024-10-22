@@ -805,6 +805,9 @@ void GetChistogram(int** img, int height, int width, int* chist)
 	}
 }
 
+
+
+
 void HistogramEqualiztion(int** img, int height, int width, int** img_out)
 {
 
@@ -872,6 +875,8 @@ int ex1008_3(void)
 	return 0;
 }
 
+
+
 void MeanFilter3x3( int height,int width, int** img, int** img_out) {
 	int y, x;
 
@@ -903,14 +908,14 @@ void MeanFilter3x3( int height,int width, int** img, int** img_out) {
 
 	//왼쪽 세로줄
 	x = 0;
-	for (y = 0; y < width; y++) {
+	for (y = 0; y < height; y++) {
 		img_out[y][x] = img[y][x];
 	}
 
 
 	//오른쪽 세로줄
 	x = width - 1;
-	for (y = 0; y < width; y++) {
+	for (y = 0; y < height; y++) {
 		img_out[y][x] = img[y][x];
 	}
 
@@ -949,173 +954,281 @@ int getMean(int y, int x, int** img) {
 }
 
 
-/*5x5 필터*/
-void MeanFilter5x5(int height, int width, int** img, int** img_out) {
-	int y, x;
+// 5x5 필터에 사용할 평균값을 계산하는 함수
+int getMean5x5(int y, int x, int** img) {
+	int sum = 0;
 
-
-	for (y = 1; y < height - 1; y++) {
-		for (x = 1; x < width - 1; x++) {
-
-			img_out[y][x] = getMean(x,y,img);
-
+	// 5x5 주변 픽셀의 합계 계산
+	for (int i = -2; i <= 2; i++) {
+		for (int j = -2; j <= 2; j++) {
+			sum += img[y + i][x + j];  // 주변 픽셀 더하기
 		}
-
 	}
 
-	//위에 가로줄
-	y = 0;
-	for (x = 0; x < width; x++) {
-		img_out[y][x] = img[y][x];
-	}
+	// 25개 값의 평균 계산 (5x5)
+	int avg = sum / 25.0 + 0.5;  // 평균 계산 후 반올림
 
-
-	//아래 가로줄
-	y = height - 1;
-	for (x = 0; x < width; x++) {
-		img_out[y][x] = img[y][x];
-	}
-
-
-	//왼쪽 세로줄
-	x = 0;
-	for (y = 0; y < width; y++) {
-		img_out[y][x] = img[y][x];
-	}
-
-
-	//오른쪽 세로줄
-	x = width - 1;
-	for (y = 0; y < width; y++) {
-		img_out[y][x] = img[y][x];
-	}
-
-
-
+	return avg;
 }
 
-
-
-
-
-
+// 5x5 평균 필터 적용 함수
 void MeanFilter5x5_(int height, int width, int** img, int** img_out) {
 	int y, x;
 
-
+	// 이미지의 중앙 부분에 5x5 필터 적용
 	for (y = 2; y < height - 2; y++) {
 		for (x = 2; x < width - 2; x++) {
-
-			
-			getMean(y, x, img);
+			img_out[y][x] = getMean5x5(y, x, img);  // 5x5 필터 평균값 계산
 		}
-
 	}
 
-	//위에 가로줄
-
+	// 위쪽 2줄 복사
 	for (y = 0; y <= 1; y++) {
-
 		for (x = 0; x < width; x++) {
-			img_out[y][x] = img[y][x];
-		}
-		for (x = 0; x < width; x++) {
-			img_out[y][x] = img[y][x];
-		}
-
-
-
-	}
-	
-	for (y = height - 1; y <= height - 2; y--) {
-		//아래 가로줄
-		for (x = 0; x < width; x++) {
-			img_out[y][x] = img[y][x];
-		}
-		for (x = 0; x < width; x++) {
-			img_out[y][x] = img[y][x];
-		}
-
-
-	}
-
-
-	
-
-
-	//왼쪽 세로줄
-
-	for (int x = 0; x <= 1; x++) {
-		for (y = 0; y < width; y++) {
-			img_out[y][x] = img[y][x];
-		}
-		for (y = 0; y < width; y++) {
-			img_out[y][x] = img[y][x];
-		}
-
-
-	}
-	
-
-	//오른쪽 세로줄
-	for (x = height - 1; x <= height - 2; x--) {
-		for (y = 0; y < width; y++) {
-			img_out[y][x] = img[y][x];
-		}
-		for (y = 0; y < width; y++) {
 			img_out[y][x] = img[y][x];
 		}
 	}
 
+	// 아래쪽 2줄 복사
+	for (y = height - 2; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 왼쪽 2줄 복사
+	for (x = 0; x <= 1; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 오른쪽 2줄 복사
+	for (x = width - 2; x < width; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
 }
 
 
 
-int getMean5x5(int y, int x, int** img) {
+int getMean7x7(int y, int x, int** img) {
+	int sum = 0;
 
-
-	/*int avg= (img[y - 1][x - 1] + img[y - 1][x] + img[y - 1][x + 1]
-	+ img[y][x - 1] + img[y][x] + img[y][x + 1]
-	+ img[y + 1][x - 1] + img[y + 1][x] + img[y + 1][x + 1]) / 9.0 + 0.5;*/
-
-
-	int sum;
-	for (int i = -2; i <= 2; i++) {
-		for (int j = -2; j <= 2; j++) {
-
-			sum = img[y + i][x + j];
+	// 7x7 주변 픽셀의 합계 계산
+	for (int i = -3; i <= 3; i++) {
+		for (int j = -3; j <= 3; j++) {
+			sum += img[y + i][x + j];  // 주변 픽셀 더하기
 		}
-
-
 	}
 
-	int avg = sum / 25.0 + 0.5;
-
-
-
-
+	// 49개 값의 평균 계산 (7x7)
+	int avg = sum / 49.0 + 0.5;  // 평균 계산 후 반올림
 	return avg;
+}
 
+void MeanFilter7x7(int height, int width, int** img, int** img_out) {
+	int y, x;
 
+	// 중앙 부분 필터링
+	for (y = 3; y < height - 3; y++) {
+		for (x = 3; x < width - 3; x++) {
+			img_out[y][x] = getMean7x7(y, x, img);  // 7x7 필터 적용
+		}
+	}
+
+	// 위쪽 가로줄 복사
+	for (y = 0; y <= 2; y++) {
+		for (x = 0; x < width; x++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 아래쪽 가로줄 복사
+	for (y = height - 3; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 왼쪽 세로줄 복사
+	for (x = 0; x <= 2; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 오른쪽 세로줄 복사
+	for (x = width - 3; x < width; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
 }
 
 
 
-int main(void)
+
+
+
+
+int ex1016_1(void)
 {
+	int height, width;
+
+	// 이미지 읽어오기
+	int** img = ReadImage((char*)"./images/lena.png", &height, &width);
+	int** img_out3x3 = (int**)IntAlloc2(height, width);
+	int** img_out5x5 = (int**)IntAlloc2(height, width);
+	int** img_out7x7 = (int**)IntAlloc2(height, width);
+
+
+
+
+	
+	//MeanFilter(height, width, img, img_out);
+	MeanFilter3x3(height, width, img, img_out3x3);
+	MeanFilter5x5_(height, width, img, img_out5x5);
+	MeanFilter7x7(height, width, img, img_out5x5);
+
+
+
+
+	ImageShow((char*)"input", img, height, width);
+	ImageShow((char*)"output", img_out3x3, height, width);
+	ImageShow((char*)"output", img_out5x5, height, width);
+	ImageShow((char*)"output", img_out7x7, height, width);
+
+	return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+/* NxN 함수*/
+
+// NxN 필터에 사용할 평균값을 계산하는 함수
+int getMeanNxN(int N, int y, int x, int** img) {
+	int delta = (N - 1) / 2;
+	int sum = 0;
+
+	// NxN 주변 픽셀의 합계 계산
+	for (int i = -delta; i <= delta; i++) {
+		for (int j = -delta; j <= delta; j++) {
+			sum += img[y + i][x + j];  // 주변 픽셀 더하기
+		}
+	}
+
+	// NxN 값의 평균 계산
+	int avg = sum / (N * N) + 0.5;  // 평균 계산 후 반올림
+	return avg;
+}
+
+void MeanFilterNxN(int N, int height, int width, int** img, int** img_out) {
+	int delta = (N - 1) / 2;
+	int y, x;
+
+	// 중앙 부분 필터링
+	for (y = delta; y < height - delta; y++) {
+		for (x = delta; x < width - delta; x++) {
+			img_out[y][x] = getMeanNxN(N, y, x, img);  // NxN 필터 적용
+		}
+	}
+
+	// 위쪽 가로줄 복사
+	for (y = 0; y < delta; y++) {
+		for (x = 0; x < width; x++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 아래쪽 가로줄 복사
+	for (y = height - delta; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 왼쪽 세로줄 복사
+	for (x = 0; x < delta; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+
+	// 오른쪽 세로줄 복사
+	for (x = width - delta; x < width; x++) {
+		for (y = 0; y < height; y++) {
+			img_out[y][x] = img[y][x];
+		}
+	}
+}
+
+int ex1016_2(void) {
 	int height, width;
 
 	// 이미지 읽어오기
 	int** img = ReadImage((char*)"./images/lena.png", &height, &width);
 	int** img_out = (int**)IntAlloc2(height, width);
 
-	
-	//MeanFilter(height, width, img, img_out);
-	MeanFilter5x5(height, width, img, img_out);
+	ImageShow((char*)"input", img, height, width);
 
+	// NxN 필터 적용 (N = 3, 5, 7, ..., 13)
+	for (int N = 3; N < 15; N += 2) {
+		MeanFilterNxN(N, height, width, img, img_out);  // NxN 평균 필터 적용
 
+		// 출력 창 이름을 N 값에 따라 다르게 설정
+		char window_name[50];
+		sprintf_s(window_name, "output_N=%d", N);  // 창 이름 지정
+		ImageShow(window_name, img_out, height, width);
+	}
 
+	return 0;
+}
+int main()
+{
+
+	ex1016_2();
+	int height, width;
+	float sum;  // float로 변경
+	// 이미지 읽어오기
+	int** img = ReadImage((char*)"./images/lena.png", &height, &width);
+	int** img_out = (int**)IntAlloc2(height, width);
+	float** kernel = (float**)FloatAlloc2(3, 3);
+
+	// 커널 값을 실수로 변경 (3x3 평균 필터)
+	kernel[0][0] = 1.0 / 9; kernel[0][1] = 1.0 / 9; kernel[0][2] = 1.0 / 9;
+	kernel[1][0] = 1.0 / 9; kernel[1][1] = 1.0 / 9; kernel[1][2] = 1.0 / 9;
+	kernel[2][0] = 1.0 / 9; kernel[2][1] = 1.0 / 9; kernel[2][2] = 1.0 / 9;
+
+	// 이미지 전체에 대해 커널 적용
+	for (int y = 1; y < height - 1; y++) {
+		for (int x = 1; x < width - 1; x++) {
+			sum = 0;  // sum 초기화
+
+			// 커널을 적용하여 합산
+			for (int m = -1; m <= 1; m++) {
+				for (int n = -1; n <= 1; n++) {
+					sum += img[y + m][x + n] * kernel[m + 1][n + 1];
+				}
+			}
+
+			// 계산된 값을 img_out에 저장
+			img_out[y][x] = (int)(sum + 0.5);  // 명시적 형변환 및 반올림
+		}
+	}
 
 	ImageShow((char*)"input", img, height, width);
 	ImageShow((char*)"output", img_out, height, width);
+
+	return 0;
 }
+
